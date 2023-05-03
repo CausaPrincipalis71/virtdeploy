@@ -10,3 +10,12 @@ def get_connection_readonly():
         sys.exit(1)
 
     return conn
+
+def get_connection():
+    try:
+        conn = libvirt.open("qemu:///system")
+    except libvirt.libvirtError:
+        print('Failed to open connection to the hypervisor')
+        sys.exit(1)
+
+    return conn
