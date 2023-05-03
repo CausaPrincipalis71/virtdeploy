@@ -1,8 +1,8 @@
 import uuid
 
-from kubdeploy.System.virt import get_connection_readonly
-from kubdeploy.System.virt import get_connection
-from kubdeploy.Utils.networking import vid_provided
+from virtdeploy.System.virt import get_connection_readonly
+from virtdeploy.System.virt import get_connection
+from virtdeploy.Utils.networking import vid_provided
 
 #Getters section
 def get_existing_connections_names():
