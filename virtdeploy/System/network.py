@@ -1,27 +1,38 @@
 import uuid
 import xml.etree.cElementTree as ET
 import logging
+import libvirt
 
 import virtdeploy.Utils.genmac as genmac
 
 from virtdeploy.System.virt import conn, connReadOnly
 
 
-#Getters section
+# Getters section
 def get_existing_connections_names():
     return [x.name() for x in connReadOnly.listAllNetworks()]
+
 
 def get_existing_connections_ifaces():
     return [x.bridgeName() for x in connReadOnly.listAllNetworks()]
 
+
 def get_existing_connections_ifaces_nums():
-   ifaces = get_existing_connections_ifaces()
-   return [int(''.join(filter(str.isdigit, iface))) for iface in ifaces]
+    ifaces = get_existing_connections_ifaces()
+    return [int(''.join(filter(str.isdigit, iface))) for iface in ifaces]
+
 
 def get_busy_subnets():
-    return
+    list = [0, 1]
+    for x in connReadOnly.listAllNetworks():
+        xml = ET.fromstring(x.XMLDesc())
+        ip = xml.find("ip").get("address").split('.')
+        if (ip[0] == '192'):
+            list.append(int(ip[2]))
+    return list
 
-#Working with networks
+
+# Working with networks
 def create_network(name, subnet, ifaceNum):
     generated_uuid = uuid.uuid4()
     mac = genmac.vid_provided("52:54:00")
@@ -47,6 +58,8 @@ def create_network(name, subnet, ifaceNum):
     net = conn.networkDefineXML(xml)
     try:
         net.create()
+        net.setAutostart(True)
+        return net
     except libvirt.libvirtError as e:
         logging.fatal(repr(e))
         net.undefine()
