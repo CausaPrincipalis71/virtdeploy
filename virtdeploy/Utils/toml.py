@@ -1,6 +1,6 @@
 import tomlkit
-import os.path
 import logging
+
 
 def get_data(fname):
     try:
@@ -10,3 +10,12 @@ def get_data(fname):
         logging.warn(repr(e))
         return None
     return data
+
+
+def write_to(fname, data):
+    try:
+        with open(fname, "a") as f:
+            f.write("\n" + tomlkit.dumps(data))
+    except IOError as e:
+        logging.warn(repr(e))
+        return False
