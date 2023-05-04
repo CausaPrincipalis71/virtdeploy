@@ -2,8 +2,10 @@ import uuid
 import xml.etree.cElementTree as ET
 import logging
 
+import virtdeploy.Utils.genmac as genmac
+
 from virtdeploy.System.virt import conn, connReadOnly
-from virtdeploy.Utils.networking import vid_provided
+
 
 #Getters section
 def get_existing_connections_names():
@@ -22,7 +24,7 @@ def get_busy_subnets():
 #Working with networks
 def create_network(name, subnet, ifaceNum):
     generated_uuid = uuid.uuid4()
-    mac = vid_provided("52:54:00")
+    mac = genmac.vid_provided("52:54:00")
     xml = f"""
     <network>
       <name>{name}</name>
