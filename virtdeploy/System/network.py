@@ -1,25 +1,26 @@
 import uuid
+import xml.etree.cElementTree as ET
+import logging
 
-from virtdeploy.System.virt import get_connection_readonly
-from virtdeploy.System.virt import get_connection
+from virtdeploy.System.virt import conn, connReadOnly
 from virtdeploy.Utils.networking import vid_provided
 
 #Getters section
 def get_existing_connections_names():
-    conn = get_connection_readonly()
-    return [x.name() for x in conn.listAllNetworks()]
+    return [x.name() for x in connReadOnly.listAllNetworks()]
 
 def get_existing_connections_ifaces():
-    conn = get_connection_readonly()
-    return [x.bridgeName() for x in conn.listAllNetworks()]
+    return [x.bridgeName() for x in connReadOnly.listAllNetworks()]
 
 def get_existing_connections_ifaces_nums():
    ifaces = get_existing_connections_ifaces()
    return [int(''.join(filter(str.isdigit, iface))) for iface in ifaces]
 
+def get_busy_subnets():
+    return
+
 #Working with networks
 def create_network(name, subnet, ifaceNum):
-    conn = get_connection()
     generated_uuid = uuid.uuid4()
     mac = vid_provided("52:54:00")
     xml = f"""
@@ -45,8 +46,7 @@ def create_network(name, subnet, ifaceNum):
     try:
         net.create()
     except libvirt.libvirtError as e:
-        #print(repr(e), file=sys.stderr)
-        print("error")
+        logging.fatal(repr(e))
         net.undefine()
         conn.close()
         exit(1)
