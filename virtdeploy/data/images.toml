@@ -1,5 +1,5 @@
-[alt:sisyphus]
+[alt-sisyphus]
 link = "http://ftp.altlinux.org/pub/distributions/ALTLinux/images/Sisyphus/cloud/x86_64/alt-sisyphus-cloud-x86_64.qcow2"
 
-[alt:p10]
+[alt-p10]
 link = "http://ftp.altlinux.org/pub/distributions/ALTLinux/images/p10/cloud/x86_64/alt-p10-cloud-x86_64.qcow2"
