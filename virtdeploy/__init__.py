@@ -5,7 +5,9 @@ import virtdeploy.Utils.random as rand
 import virtdeploy.System.network as net
 
 VERSION = "1.0.0"
+
 _prefix = os.path.join(os.path.dirname(__file__))
+_dataPrefix = os.path.join(os.path.dirname(__file__))
 
 
 def createNet(name):

@@ -6,9 +6,9 @@ import virtdeploy.Utils.toml as toml
 
 
 def getImagesData():
-    data = toml.get_data(virtdeploy._prefix + "/data/images.toml")
+    data = toml.get_data(virtdeploy._dataPrefix + "/data/images.toml")
     if data is None:
-        logging.fatal(f"Cannot find {virtdeploy._prefix}/data/images.toml, please create it manually")
+        logging.fatal(f"Cannot find {virtdeploy._dataPrefix}/data/images.toml, please create it manually")
         exit(1)
 
     return data
@@ -23,7 +23,7 @@ def getImageLink(name):
     data = getImagesData()
 
     if isImageExist(name) is False or data.get(name).get("link") is None:
-        logging.warn(f"Cannot find info about {name}, please add it manually in {virtdeploy._prefix}/data/images.toml")
+        logging.warn(f"Cannot find info about {name}, please add it manually in {virtdeploy._dataPrefix}/data/images.toml")
         return None
 
     return data.get(name).get("link")
@@ -33,7 +33,7 @@ def addNewImage(name, link):
     data = {name: {"link": link}}
 
     if isImageExist(name) is True:
-        logging.warn(f"Cannot add {name} in {virtdeploy._prefix}/data/images.toml. It`s already exists")
+        logging.warn(f"Cannot add {name} in {virtdeploy._dataPrefix}/data/images.toml. It`s already exists")
         return False
 
-    return toml.write_to(virtdeploy._prefix + "/data/images.toml", data)
+    return toml.write_to(virtdeploy._dataPrefix + "/data/images.toml", data)
