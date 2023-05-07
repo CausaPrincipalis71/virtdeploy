@@ -32,6 +32,18 @@ def get_busy_subnets():
     return list
 
 
+def getNetworkUuid(netName):
+    for net in connReadOnly.listAllNetworks():
+        if net.name == netName:
+            return net.UUIDString
+
+
+def getNetworkBridge(netName):
+    for net in connReadOnly.listAllNetworks():
+        if net.name == netName:
+            return net.bridgeName
+
+
 # Working with networks
 def create_network(name, subnet, ifaceNum):
     generated_uuid = uuid.uuid4()

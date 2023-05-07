@@ -1,0 +1,13 @@
+[master]
+ram = 2048
+cpu = 2
+exclude = "worker"
+
+[worker]
+ram = 2048
+cpu = 2
+exclude = "master"
+
+[etcd]
+ram = 1024
+cpu = 1
