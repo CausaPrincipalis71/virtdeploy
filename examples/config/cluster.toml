@@ -1,0 +1,15 @@
+[Cluster]
+name = "TestCluster"
+image = "alt-p10"
+
+domain.master.amount = 2
+domain.master.type = "default"
+
+domain.worker.amount = 2
+domain.worker.type = "default"
+
+domain.etcd.amount = 3
+domain.etcd.type = "default"
+
+[UserData]
+sshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDudAyGDQQdtfq/1q+f6eyFBHlk7/OfXFcAV1TrRsB2r8USdJ6/oL8v8AoFk2yv1HqGtgo9FK7jSeSMi7hTlNqFvdBXpwgZefug7jzJOrgPQGxCfZJ3zBDLK/x7oDKeId0fCUR9J41dCGrctCrqzVlrBoz1Y8iLNxH0RXgO8QYDPGDMdqociIODyfSNzSUx62BFaA1Qv/7F8iCJ/noBSnyuOPOW1EOyQYbcILp1G3ZxhcnBZNSxkqtJ80qlTt+6QvJuSiG+bzmN5O8Yob9hqAsSIJGe/E5vo+cDMHIsmq4hrZM7x/LdyHFq82s29nc60SrDhaq2u9Ga77v1wjLBp8qN"
