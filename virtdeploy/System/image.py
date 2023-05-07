@@ -6,7 +6,7 @@ import virtdeploy.Utils.toml as toml
 
 
 def getImagesData():
-    data = toml.get_data(virtdeploy._dataPrefix + "/data/images.toml")
+    data = toml.getData(virtdeploy._dataPrefix + "/data/images.toml")
     if data is None:
         logging.fatal(f"Cannot find {virtdeploy._dataPrefix}/data/images.toml, please create it manually")
         exit(1)
@@ -27,6 +27,11 @@ def getImageLink(name):
         return None
 
     return data.get(name).get("link")
+
+
+def getImageFilename(name):
+    link = getImageLink(name)
+    return link.split('/')[-1]
 
 
 def addNewImage(name, link):
