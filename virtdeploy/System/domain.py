@@ -2,6 +2,7 @@ import virtdeploy
 import logging
 import uuid
 import libvirt
+import subprocess
 
 import virtdeploy.Utils.toml as toml
 import virtdeploy.System.network as network
@@ -13,7 +14,7 @@ from virtdeploy.System.virt import conn
 # Domains type info
 # Begin
 def getDomainTypesData():
-    data = toml.get_data(virtdeploy._dataPrefix + "/data/types.toml")
+    data = toml.getData(virtdeploy._dataPrefix + "/data/types.toml")
     if data is None:
         logging.fatal(f"Cannot find {virtdeploy._dataPrefix}/data/types.toml, please create it manually")
         return None
@@ -42,7 +43,36 @@ def addNewType(name, cpu, ram):
 # End
 
 
-def createDomain(domainType, number, net, iso, initImage):
+def createInitImage(domainDir):
+    userData = f"{domainDir}/user-data.yaml"
+    metaData = f"{domainDir}/meta-data.yaml"
+    output = f"{domainDir}/seed.img"
+    return subprocess.run(["cloud-localds", output, userData, metaData])
+
+
+def createBaseUserData(sshKey, file):
+    userdata = f"""
+    users:
+      - name: root
+        ssh_authorized_keys:
+          - ssh-rsa ${sshKey}
+    """
+
+    with open(file, "w") as f:
+        return f.write(userdata)
+
+
+def createBaseMetaData(hostname, file):
+    metadata = f"""
+    instance-id: {hostname}
+    local-hostname: {hostname}
+    """
+
+    with open(file, "w") as f:
+        return f.write(metadata)
+
+
+def createDomain(domainDir, domainType, number, net, imageFilename):
     generated_uuid = uuid.uuid4()
     mac = vid_provided("52:54:00")
     netBridge = network.getNetworkBridge(net)
@@ -90,7 +120,7 @@ def createDomain(domainType, number, net, iso, initImage):
         <emulator>/usr/bin/qemu-system-x86_64</emulator>
         <disk type='file' device='disk'>
           <driver name='qemu' type='qcow2'/>
-          <source file='{iso}' index='2'/>
+          <source file='{domainDir}/{imageFilename}' index='2'/>
           <backingStore/>
           <target dev='vda' bus='virtio'/>
           <alias name='virtio-disk0'/>
@@ -98,7 +128,7 @@ def createDomain(domainType, number, net, iso, initImage):
         </disk>
         <disk type='file' device='cdrom'>
           <driver name='qemu' type='raw'/>
-          <source file='{initImage}' index='1'/>
+          <source file='{domainDir}/seed.img' index='1'/>
           <backingStore/>
           <target dev='sda' bus='sata'/>
           <readonly/>

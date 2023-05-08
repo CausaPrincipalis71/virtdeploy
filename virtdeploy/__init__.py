@@ -25,5 +25,12 @@ def initCluster(tomlFile):
     if net is None:
         return None
 
-    cluster.createClusterDir(name, tomlFile, net.XMLDesc())
-    cluster.downloadClusterImage(name, tomlFile)
+    try:
+        cluster.createClusterDir(name, tomlFile, net.XMLDesc())
+        cluster.downloadClusterImage(name, tomlFile)
+        cluster.createDomains(name, tomlFile)
+    except Exception as e:
+        print(e.with_traceback())
+        net.destroy()
+        net.undefine()
+        cluster.removeClusterDir(name)
