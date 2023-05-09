@@ -1,7 +1,8 @@
 import os
 
-import virtdeploy.Utils.random as rand
+from virtdeploy.System.virt import conn
 
+import virtdeploy.Utils.random as rand
 import virtdeploy.System.network as network
 import virtdeploy.System.cluster as cluster
 
@@ -18,6 +19,13 @@ def createNet(name):
     return network.create_network(name, subnet, ifacenum)
 
 
+def destroyCluster(name):
+    net = conn.networkLookupByName(name)
+    net.destroy()
+    net.undefine()
+    cluster.removeClusterDir(name)
+
+
 def initCluster(tomlFile):
     name = cluster.getClusterName(tomlFile)
 
@@ -27,10 +35,9 @@ def initCluster(tomlFile):
 
     try:
         cluster.createClusterDir(name, tomlFile, net.XMLDesc())
+        cluster.createSshKey(name)
         cluster.downloadClusterImage(name, tomlFile)
         cluster.createDomains(name, tomlFile)
     except Exception as e:
+        destroyCluster(name)
         print(e.with_traceback())
-        net.destroy()
-        net.undefine()
-        cluster.removeClusterDir(name)

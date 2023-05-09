@@ -4,11 +4,13 @@ import uuid
 import libvirt
 import subprocess
 
+import xml.etree.ElementTree as ET
+
 import virtdeploy.Utils.toml as toml
 import virtdeploy.System.network as network
 
 from virtdeploy.Utils.genmac import vid_provided
-from virtdeploy.System.virt import conn
+from virtdeploy.System.virt import conn, connReadOnly
 
 
 # Domains type info
@@ -51,12 +53,12 @@ def createInitImage(domainDir):
 
 
 def createBaseUserData(sshKey, file):
-    userdata = f"""
-    users:
-      - name: root
-        ssh_authorized_keys:
-          - ssh-rsa ${sshKey}
-    """
+    userdata = f"""#cloud-config
+users:
+   - name: root
+     ssh-authorized-keys:
+       - {sshKey} user@any
+"""
 
     with open(file, "w") as f:
         return f.write(userdata)
@@ -72,11 +74,20 @@ def createBaseMetaData(hostname, file):
         return f.write(metadata)
 
 
-def createDomain(domainDir, domainType, number, net, imageFilename):
+def createDomain(domainDir, domainType, number, net, ipNum, imageFilename):
     generated_uuid = uuid.uuid4()
     mac = vid_provided("52:54:00")
+
     netBridge = network.getNetworkBridge(net)
     netUuid = network.getNetworkUuid(net)
+    netIp = network.getNetworkIp(net).split('.')
+
+    netIp.pop()
+    netIp.append(f"{ipNum}")
+    domainIp = '.'.join(netIp)
+
+    virNetwork = conn.networkLookupByName(net)
+
     domainTypeName = ""
     cpu = int()
     ram = int()
@@ -85,6 +96,9 @@ def createDomain(domainDir, domainType, number, net, imageFilename):
         domainTypeName += i
         cpu += (typeInfo.get("cpu"))
         ram += (typeInfo.get("ram"))
+
+    with open(f"{domainDir}/info.toml", "w") as f:
+        f.write(f"[Network]\nuuid = {generated_uuid}\nmac = {mac}\nip = {domainIp}")
 
     xml = f"""
     <domain type='kvm' id='1'>
@@ -292,6 +306,9 @@ def createDomain(domainDir, domainType, number, net, imageFilename):
     domain = conn.defineXML(xml)
     try:
         domain.create()
+        virNetwork.update(libvirt.VIR_NETWORK_UPDATE_COMMAND_ADD_LAST,
+                          libvirt.VIR_NETWORK_SECTION_IP_DHCP_HOST, -1,
+                          f"<host mac='{mac}' name='{domainTypeName}{number}' ip='{domainIp}'/>")
         return domain
     except libvirt.libvirtError as e:
         logging.fatal(repr(e))

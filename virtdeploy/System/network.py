@@ -32,6 +32,10 @@ def get_busy_subnets():
     return list
 
 
+def getNetByName(name):
+    return connReadOnly.networkLookupByName(name)
+
+
 def getNetworkUuid(netName):
     for net in connReadOnly.listAllNetworks():
         if net.name == netName:
@@ -42,6 +46,12 @@ def getNetworkBridge(netName):
     for net in connReadOnly.listAllNetworks():
         if net.name == netName:
             return net.bridgeName
+
+
+def getNetworkIp(netName):
+    net = connReadOnly.networkLookupByName(netName)
+    xml = ET.fromstring(net.XMLDesc())
+    return xml.find("ip").get("address")
 
 
 # Working with networks
