@@ -9,6 +9,7 @@ from virtdeploy.System.virt import conn
 import virtdeploy.Utils.toml as toml
 import virtdeploy.System.image as image
 import virtdeploy.System.domain as domain
+import virtdeploy.System.network as network
 
 
 home = os.path.expanduser("~")
@@ -63,11 +64,16 @@ def createDomains(name, tomlFile):
     imageFile = getImageFile(name, tomlFile)
     imageFilename = imageFile.split('/')[-1]
     domains = toml.getData(tomlFile).get("Cluster").get("domain")
+
+    ansibleFile = open(f"{home}/.virtdeploy/{name}/ansible_hosts", "w")
+    ip = network.getNetworkIp(name)[:-1]
+
     with open(f"{home}/.virtdeploy/{name}/keys/key.public", 'r') as sshKeyFile:
         sshKey = sshKeyFile.read()
     machineIpNum = 2
 
     for domainType in domains:
+        ansibleFile.write(f"[{domainType}]\n")
         for i in range(domains.get(domainType).get("amount")):
             # Deploying a domain
             domainDir = f"{home}/.virtdeploy/{name}/domains/{domainType}{i}"
@@ -80,7 +86,9 @@ def createDomains(name, tomlFile):
             domain.createInitImage(domainDir)
             # Creating domain
             domain.createDomain(domainDir, [domainType], i, name, machineIpNum, imageFilename)
+            ansibleFile.write(f"{name}-{domainType}{i} ansible_ssh_host={ip}{machineIpNum}\n")
             machineIpNum += 1
+        ansibleFile.write(f"\n[{domainType}:vars]\nansible_ssh_user=root\nansible_ssh_private_key_file={home}/.virtdeploy/{name}/keys/key.private\n\n")
 
 
 def getImageFile(name, tomlFile):
