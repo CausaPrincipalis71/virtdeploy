@@ -108,7 +108,7 @@ def createDomain(domainDir, domainType, number, net, ipNum, imageFilename):
     resizeImage(f"{domainDir}/{imageFilename}", disk)
 
     with open(f"{domainDir}/info.toml", "w") as f:
-        f.write(f"[Network]\nuuid = {generated_uuid}\nmac = {mac}\nip = {domainIp}")
+        f.write(f"[Network]\nuuid = \"{generated_uuid}\"\nmac = \"{mac}\"\nip = \"{domainIp}\"")
 
     xml = f"""
     <domain type='kvm' id='1'>
