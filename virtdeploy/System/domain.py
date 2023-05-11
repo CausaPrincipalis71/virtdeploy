@@ -4,13 +4,11 @@ import uuid
 import libvirt
 import subprocess
 
-import xml.etree.ElementTree as ET
-
 import virtdeploy.Utils.toml as toml
 import virtdeploy.System.network as network
 
 from virtdeploy.Utils.genmac import vid_provided
-from virtdeploy.System.virt import conn, connReadOnly
+from virtdeploy.System.virt import conn
 
 
 # Domains type info
@@ -52,12 +50,21 @@ def createInitImage(domainDir):
     return subprocess.run(["cloud-localds", output, userData, metaData])
 
 
+def resizeImage(iso, diskSize):
+    return subprocess.run(["qemu-img", "resize", iso, diskSize])
+
+
 def createBaseUserData(sshKey, file):
     userdata = f"""#cloud-config
 users:
    - name: root
      ssh-authorized-keys:
        - {sshKey} user@any
+
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
 """
 
     with open(file, "w") as f:
@@ -96,6 +103,9 @@ def createDomain(domainDir, domainType, number, net, ipNum, imageFilename):
         domainTypeName += i
         cpu += (typeInfo.get("cpu"))
         ram += (typeInfo.get("ram"))
+        disk = typeInfo.get("size")
+
+    resizeImage(f"{domainDir}/{imageFilename}", disk)
 
     with open(f"{domainDir}/info.toml", "w") as f:
         f.write(f"[Network]\nuuid = {generated_uuid}\nmac = {mac}\nip = {domainIp}")

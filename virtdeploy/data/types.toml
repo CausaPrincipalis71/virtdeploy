@@ -1,13 +1,16 @@
 [master]
 ram = 2048
 cpu = 2
+size = "4G"
 exclude = "worker"
 
 [worker]
 ram = 2048
 cpu = 2
+size = "8G"
 exclude = "master"
 
 [etcd]
 ram = 1024
 cpu = 1
+size = "6G"
