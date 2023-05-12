@@ -17,4 +17,5 @@ namespace = parser.parse_args(sys.argv[1:])
 if namespace.run:
     kubernetes_deploy.createVariablesFile(namespace.run)
     kubernetes_deploy.installEtcd(namespace.run)
+    kubernetes_deploy.installKubernetesMaster(namespace.run)
     sys.exit(0)

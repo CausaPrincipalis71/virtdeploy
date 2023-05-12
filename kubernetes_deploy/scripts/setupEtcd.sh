@@ -30,7 +30,7 @@ ExecStart=/usr/sbin/etcd \\
   --advertise-client-urls http://$thisIp:2379 \\
   --initial-cluster-token $etcdToken \\
   --initial-advertise-peer-urls http://$thisIp:2380 \\
-  --initial-cluster {CLUSTER_REPLACE} \\
+  --initial-cluster {CLUSTER_REPLACE_IP} \\
   --initial-cluster-state new
 
 [Install]

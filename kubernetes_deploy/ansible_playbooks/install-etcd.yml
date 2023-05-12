@@ -1,6 +1,6 @@
 - hosts: etcd
   tasks:
-    - name: Installs base kubernetes packages
+    - name: Installs etcd package
       apt_rpm:
         pkg:
           - etcd
@@ -11,4 +11,5 @@
     - copy:
         src: "{{ DIR }}/scripts/{{ ETCD_SCRIPT_FILE }}"
         dest: "~/scripts/{{ ETCD_SCRIPT_FILE }}"
-    - command: sh "~/scripts/{{ ETCD_SCRIPT_FILE }}"
+    - name: Run setupEtcd.sh
+      command: sh "~/scripts/{{ ETCD_SCRIPT_FILE }}"

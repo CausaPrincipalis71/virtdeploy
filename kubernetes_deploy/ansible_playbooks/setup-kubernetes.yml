@@ -1,0 +1,73 @@
+- hosts: master
+  tasks:
+    - name: Installs kubernetes packages
+      apt_rpm:
+        pkg:
+          - kubernetes-kubeadm
+          - kubernetes-kubelet
+          - kubernetes-crio
+          - cri-tools
+        state: present
+        update_cache: true
+    - name: start and enable k8s services
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - crio
+        - kubelet
+    - name: Copy setupMasterKubernetes.sh on nodes
+      file: path=~/scripts state=directory
+    - copy:
+        src: "{{ DIR }}/scripts/setupMasterKubernetes.sh"
+        dest: "~/scripts/setupMasterKubernetes.sh"
+
+- hosts: "{{ CLUSTER_NAME }}-master0"
+  tasks:
+   - name: Init cluster on master0
+     command: sh "~/scripts/setupMasterKubernetes.sh"
+   - name: Copy certs on localhost
+     fetch:
+       src: "~/{{ item }}"
+       dest: "{{ DIR }}/{{ item }}"
+       flat: 1
+     loop:
+       - certificates.tar.gz
+       - join-command.sh
+
+- hosts: master:!~{{ CLUSTER_NAME }}-master0
+  tasks:
+   - name: Copy certs on other master node
+     copy:
+        src: "{{ DIR }}/certificates.tar.gz"
+        dest: "~/certificates.tar.gz"
+   - name: Run setupMasterKubernetes.sh
+     command: sh "~/scripts/setupMasterKubernetes.sh"
+
+- hosts: worker
+  tasks:
+    - name: Installs kubernetes packages
+      apt_rpm:
+        pkg:
+          - kubernetes-kubeadm
+          - kubernetes-kubelet
+          - kubernetes-crio
+          - cri-tools
+        state: present
+        update_cache: true
+    - name: start and enable k8s services
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - crio
+        - kubelet
+    - name: Copy join-command.sh on nodes
+      file: path=~/scripts state=directory
+    - copy:
+        src: "{{ DIR }}/join-command.sh"
+        dest: "~/scripts/join-command.sh"
+    - name: Join cluster
+      command: sh "~/scripts/join-command.sh"
