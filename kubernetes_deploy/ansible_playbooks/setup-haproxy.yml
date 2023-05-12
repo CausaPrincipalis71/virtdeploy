@@ -1,0 +1,15 @@
+- hosts: worker
+  tasks:
+    - name: Installs worker package
+      apt_rpm:
+        pkg:
+          - haproxy
+        state: present
+        update_cache: true
+    - name: Copy setupHaproxy.sh on nodes
+      file: path=~/scripts state=directory
+    - copy:
+        src: "{{ DIR }}/scripts/setupHaproxy.sh"
+        dest: "~/scripts/setupHaproxy.sh"
+    - name: Run setupHaproxy.sh
+      command: sh "~/scripts/setupHaproxy.sh"

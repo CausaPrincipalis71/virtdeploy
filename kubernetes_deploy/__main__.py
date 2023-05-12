@@ -16,6 +16,7 @@ namespace = parser.parse_args(sys.argv[1:])
 
 if namespace.run:
     kubernetes_deploy.createVariablesFile(namespace.run)
-    kubernetes_deploy.installEtcd(namespace.run)
-    kubernetes_deploy.installKubernetesMaster(namespace.run)
+    kubernetes_deploy.setupEtcd(namespace.run)
+    kubernetes_deploy.setupKubernetes(namespace.run)
+    kubernetes_deploy.setupHaproxy(namespace.run)
     sys.exit(0)

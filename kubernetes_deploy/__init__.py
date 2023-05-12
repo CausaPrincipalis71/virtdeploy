@@ -35,7 +35,7 @@ def createVariablesFile(clusterName):
     subprocess.run(["ansible-playbook", "-i", f"{clusterDir}/ansible_hosts", f"{deployDir}/ansible_playbooks/copy-file.yml", "--extra-var", f"DIR={deployDir} NAME=vars.sh"])
 
 
-def installEtcd(clusterName):
+def setupEtcd(clusterName):
     clusterDir = f"{home}/.virtdeploy/{clusterName}"
     deployDir = f"{home}/.kubernetes_deploy/{clusterName}"
 
@@ -52,10 +52,10 @@ def installEtcd(clusterName):
     with open(f"{deployDir}/scripts/setupEtcd.sh", "w") as f:
         f.write(newData)
 
-    return subprocess.run(["ansible-playbook", "-i", f"{clusterDir}/ansible_hosts", f"{deployDir}/ansible_playbooks/install-etcd.yml", "--extra-var", f"DIR={deployDir} ETCD_SCRIPT_FILE=setupEtcd.sh"])
+    return subprocess.run(["ansible-playbook", "-i", f"{clusterDir}/ansible_hosts", f"{deployDir}/ansible_playbooks/setup-etcd.yml", "--extra-var", f"DIR={deployDir} ETCD_SCRIPT_FILE=setupEtcd.sh"])
 
 
-def installKubernetesMaster(clusterName):
+def setupKubernetes(clusterName):
     clusterDir = f"{home}/.virtdeploy/{clusterName}"
     deployDir = f"{home}/.kubernetes_deploy/{clusterName}"
 
@@ -77,3 +77,25 @@ def installKubernetesMaster(clusterName):
         f.write(newData)
 
     return subprocess.run(["ansible-playbook", "-i", f"{clusterDir}/ansible_hosts", f"{deployDir}/ansible_playbooks/setup-kubernetes.yml", "--extra-var", f"DIR={deployDir} CLUSTER_NAME={clusterName}"])
+
+
+def setupHaproxy(clusterName):
+    clusterDir = f"{home}/.virtdeploy/{clusterName}"
+    deployDir = f"{home}/.kubernetes_deploy/{clusterName}"
+
+    masterServers = ""
+
+    serverNum = 1
+    for masterDomain in pathlib.Path(f"{clusterDir}/domains").glob("master*"):
+        masterServers += f"server apiserver{serverNum} ${{{masterDomain.name}_IP}}:6443 check\n        "
+        serverNum += 1
+
+    with open(f"{deployDir}/scripts/setupHaproxy.sh") as f:
+        oldData = f.read()
+
+    newData = oldData.replace("{CLUSTER_REPLACE_SERVER}", f"{masterServers[:-9]}")
+
+    with open(f"{deployDir}/scripts/setupHaproxy.sh", "w") as f:
+        f.write(newData)
+
+    return subprocess.run(["ansible-playbook", "-i", f"{clusterDir}/ansible_hosts", f"{deployDir}/ansible_playbooks/setup-haproxy.yml", "--extra-var", f"DIR={deployDir}"])
