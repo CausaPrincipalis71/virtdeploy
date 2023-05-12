@@ -1,0 +1,14 @@
+- hosts: etcd
+  tasks:
+    - name: Installs base kubernetes packages
+      apt_rpm:
+        pkg:
+          - etcd
+        state: present
+        update_cache: true
+    - name: Copy setupEtcd.sh on nodes
+      file: path=~/scripts state=directory
+    - copy:
+        src: "{{ DIR }}/scripts/{{ ETCD_SCRIPT_FILE }}"
+        dest: "~/scripts/{{ ETCD_SCRIPT_FILE }}"
+    - command: sh "~/scripts/{{ ETCD_SCRIPT_FILE }}"

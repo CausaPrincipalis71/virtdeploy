@@ -1,0 +1,6 @@
+- hosts: "all"
+  tasks:
+  - name: Copy files given by --extra-var
+    copy:
+     src: '{{DIR}}/{{NAME}}'
+     dest: '~/{{NAME}}'
