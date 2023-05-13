@@ -9,6 +9,9 @@ def createParser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--create', metavar="[file.toml]", help="Create cluster described in file")
     parser.add_argument('-d', '--delete', metavar="\"ClusterName\"", help="Delete cluster by name")
+    parser.add_argument('-r', '--run', metavar="\"ClusterName\"", help="Run all cluster vm`s")
+    parser.add_argument('-s', '--stop', metavar="\"ClusterName\"", help="Stop all cluster vm`s")
+    parser.add_argument('-g', '--get-info', metavar="\"ClusterName\"", help="Get info about cluster")
 
     return parser
 
